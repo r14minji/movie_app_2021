@@ -1,51 +1,54 @@
 import React from "react";
-import PropTypes from "prop-types";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
-const foodILike = [
-  {
-    id: 1,
-    name: "Kimchi",
-    image:
-      "https://www.30ml.store/shopimages/30mlstore/005005000082.jpg?1593064288",
-    rating: 4.5,
-  },
-  {
-    id: 2,
-    name: "Samgyeopsal",
-    image: "https://cdn.mindgil.com/news/photo/202103/70839_7148_1250.jpg",
-    rating: 4.7,
-  },
-];
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: [],
+  };
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.nomadcoders1.now.sh/list_movies.json"
+    );
+    console.log(movies);
+    this.setState({ movies, isLoading: false });
+  };
+  componentDidMount() {
+    this.getMovies();
+  }
 
-function Food({ name, picture, rating }) {
-  return (
-    <div>
-      <h1>I like {name}</h1>
-      <img src={picture} alt={name} />
-      <p>{rating}/5.0</p>
-    </div>
-  );
-}
-
-Food.propTypes = {
-  name: PropTypes.string.isRequired,
-  picture: PropTypes.string.isRequired,
-  rating: PropTypes.number,
-};
-
-function App() {
-  return (
-    <div>
-      {foodILike.map((dish) => (
-        <Food
-          key={dish.id}
-          name={dish.name}
-          picture={dish.image}
-          rating={dish.rating}
-        />
-      ))}
-    </div>
-  );
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <section class="container">
+        {isLoading ? (
+          <div class="loader">
+            <span class="loader__text">Loading...</span>
+          </div>
+        ) : (
+          <div class="movies">
+            {movies.map((movie) => {
+              return (
+                <Movie
+                  id={movie.id}
+                  year={movie.year}
+                  title={movie.title}
+                  summary={movie.summary}
+                  poster={movie.medium_cover_image}
+                />
+              );
+            })}
+          </div>
+        )}
+      </section>
+    );
+  }
 }
 
 export default App;
